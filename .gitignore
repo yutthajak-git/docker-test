@@ -33,6 +33,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# docker
+Docker-compose-dev
+.Docker-compose.dev
+/Docker-compose.dev
+
 **/*.trace
 **/*.zip
 **/*.tar.gz
