@@ -13,7 +13,6 @@ let connect: mysql.Connection | null = null;
 };*/
 
 const initMySQL = async () => {
-    // โยน URL เข้าไปทั้งก้อนเลย mysql2 จะจัดการแยกส่วนให้เอง
     connect = await mysql.createConnection(process.env.DATABASE_URL as string);
 };
 
@@ -42,7 +41,7 @@ const app = new Elysia()
     })
     //listen server
     .get("/hello", () => "Hello Elysia")
-    .listen(8000);
+    .listen(process.env.APP_PORT || 8000);
 
 console.log(
     `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
