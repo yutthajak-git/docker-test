@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import mysql from "mysql2/promise";
+import { rateLimit } from "elysia-rate-limit"; // 1. Import plugin
 
 let connect: mysql.Connection | null = null;
 
@@ -34,6 +35,14 @@ if (!connected) {
 }
 
 const app = new Elysia()
+
+    .use(
+        rateLimit({
+            duration: 60000, // กำหนดกรอบเวลา 60 วินาที
+            max: 10, // ให้ยิงได้สูงสุดแค่ 10 ครั้งต่อ 1 IP
+            errorResponse: "ใจเย็นวัยรุ่น ยิง API เร็วไปแล้ว!", // ข้อความด่ากลับ
+        }),
+    )
     // path = GET /users สำหรับ get users ทั้งหมดที่บันทึกเข้าไปออกมา
     .get("/users", async () => {
         const [results] = await connect!.query("SELECT * FROM users");
