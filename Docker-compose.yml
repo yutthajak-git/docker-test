@@ -1,5 +1,17 @@
 #version: "5.1.3" # กำหนด docker version
 services:
+    nginx-proxy-manager:
+        image: "jc21/nginx-proxy-manager:latest"
+        restart: unless-stopped
+        ports:
+            - "80:80" # ประตูหน้าสำหรับคนทั่วไป (HTTP)
+            - "443:443" # ประตูหน้าแบบปลอดภัย (HTTPS)
+            - "81:81" # ประตูหลังสำหรับเราเข้าไปตั้งค่า (หน้า Dashboard)
+        volumes:
+            - ./nginx-data:/data
+            - ./nginx-letsencrypt:/etc/letsencrypt
+        networks:
+            - app-network # ต้องให้อยู่ Network เดียวกับ Elysia นะครับ
     bun-app-compose: # ตั้งชื่อ container (เหมือน --name)
         container_name: ${APP_NAME}-api
         build: . # ตำแหน่ง dockerfile
@@ -11,6 +23,8 @@ services:
             db:
                 condition: service_healthy # รอให้ db healthy ก่อนจึงเริ่ม bun
         restart: always
+        networks:
+            - app-network # ต้องให้อยู่ Network เดียวกับ Elysia นะครับ
     db:
         image: mysql:latest
         container_name: ${APP_NAME}-db
@@ -36,12 +50,15 @@ services:
             interval: 5s # ตรวจทุก 5 วิ
             timeout: 5s # timeout ต่อครั้ง
             retries: 10 # ลอง 10 ที
+        #networks
+        networks:
+            - app-network
     phpmyadmin:
         image: phpmyadmin/phpmyadmin:latest
         container_name: phpmyadmin
         environment:
             PMA_HOST: db # ระบุ host ที่จะให้ phpmyadmin ไปจัดการ ซึ่งสามารถใส่เป็นชื่อ container name (db) ได้เลย
-            PMA_PORT: ${DB_PORT} # ระบุ port ของ Database
+            PMA_PORT: 3306 # ระบุ port ของ Database
             PMA_USER: root # ระบุ user ของ Database
             PMA_PASSWORD: ${DB_ROOT_PASSWORD} # ระบุ password ของ Database
         ports:
@@ -50,8 +67,15 @@ services:
             - db
 
         restart: always #ถ้าล่มให้ restart เอง
+        #networks
+        networks:
+            - app-network
 
 # volumes จะ map path เองในเครื่อง
 volumes:
     mysql_data_test: # กำหนดชื่อ volume ที่ต้องการจะสร้าง
         driver: local # ขอใช้ dists loacl
+#networks
+networks:
+    app-network:
+        driver: bridge
