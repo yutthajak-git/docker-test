@@ -1,0 +1,54 @@
+#version: "5.1.3" # กำหนด docker version
+services:
+    bun-app-compose: # ตั้งชื่อ container (เหมือน --name)
+        container_name: bun
+        build: . # ตำแหน่ง dockerfile
+        ports:
+            - "8000:8000" # map port ออกมา เหมือน -p ใน docker run
+        depends_on:
+            db:
+                condition: service_healthy # รอให้ db healthy ก่อนจึงเริ่ม bun
+    db:
+        image: mysql:latest
+        container_name: db
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root # กำหนด user ของ root mysql
+            MYSQL_DATABASE: tutorial # กำหนด database เริ่มต้นของ mysql
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data_test:/var/lib/mysql
+
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "mysqladmin",
+                    "ping",
+                    "-h",
+                    "localhost",
+                    "-u",
+                    "root",
+                    "-proot",
+                ]
+            interval: 5s # ตรวจทุก 5 วิ
+            timeout: 5s # timeout ต่อครั้ง
+            retries: 10 # ลองซ้ำสูงสุด 10 ครั้ง
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: phpmyadmin
+        environment:
+            PMA_HOST: db # ระบุ host ที่จะให้ phpmyadmin ไปจัดการ ซึ่งสามารถใส่เป็นชื่อ container name (db) ได้เลย
+            PMA_PORT: 3306 # ระบุ port ของ Database
+            PMA_USER: root # ระบุ user ของ Database
+            PMA_PASSWORD: root # ระบุ password ของ Database
+        ports:
+            - "8080:80"
+        depends_on:
+            - db
+
+# volumes จะ map path เองในเครื่อง
+volumes:
+    mysql_data_test: # กำหนดชื่อ volume ที่ต้องการจะสร้าง
+        driver: local # ขอใช้ dists loacl
