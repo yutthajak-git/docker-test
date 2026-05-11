@@ -15,8 +15,6 @@ services:
     bun-app-compose: # ตั้งชื่อ container (เหมือน --name)
         container_name: ${APP_NAME}-api
         build: . # ตำแหน่ง dockerfil e
-        ports:
-            - "${APP_PORT}:8000" # map port ออกมา เหมือน -p ใน docker run
         env_file: # อ่านไฟล์ .env
             - .env # โยน envให้ Bun รู้จัก
         depends_on:
@@ -61,8 +59,6 @@ services:
             PMA_PORT: 3306 # ระบุ port ของ Database
             PMA_USER: root # ระบุ user ของ Database
             PMA_PASSWORD: ${DB_ROOT_PASSWORD} # ระบุ password ของ Database
-        ports:
-            - "${PHP_PORT}:80"
         depends_on:
             - db
 

@@ -39,7 +39,7 @@ const app = new Elysia()
     .use(
         rateLimit({
             duration: 60000, // กำหนดกรอบเวลา 60 วินาที
-            max: 10, // ให้ยิงได้สูงสุดแค่ 10 ครั้งต่อ 1 IP
+            max: 5, // ให้ยิงได้สูงสุดแค่ 10 ครั้งต่อ 1 IP
             errorResponse: "ใจเย็นวัยรุ่น ยิง API เร็วไปแล้ว!", // ข้อความด่ากลับ
         }),
     )
@@ -49,6 +49,7 @@ const app = new Elysia()
         return results;
     })
     //listen server
+    .get("/", () => "server listen done!")
     .get("/hello", () => "Hello Elysia")
     .listen(process.env.APP_PORT || 8000);
 
