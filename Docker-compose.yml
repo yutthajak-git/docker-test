@@ -11,7 +11,25 @@ services:
             - ./nginx-data:/data
             - ./nginx-letsencrypt:/etc/letsencrypt
         networks:
-            - app-network # ต้องให้อยู่ Network เดียวกับ Elysia นะครับ
+            - app-network # ต้องให้อยู่ Network เดียวกับ Elysia
+    #logs
+    dozzle:
+        image: amir20/dozzle:latest
+        container_name: dozzle
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock # สำคัญ! เพื่อให้มันอ่าน Log ในเครื่องได้
+        restart: always
+        networks:
+            - app-network
+    #healt check
+    uptime-kuma:
+        image: louislam/uptime-kuma:1
+        container_name: uptime-kuma
+        volumes:
+            - ./uptime-kuma-data:/app/data
+        restart: always
+        networks:
+            - app-network
     bun-app-compose: # ตั้งชื่อ container (เหมือน --name)
         container_name: ${APP_NAME}-api
         build: . # ตำแหน่ง dockerfil e
